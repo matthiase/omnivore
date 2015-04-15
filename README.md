@@ -1,12 +1,21 @@
 ## Omnivore: a library for decrufting HTML documents
 
 Omnivore is a library for extracting "real" content from HTML documents.  Currently, the approach is limited to
-analysing text density to distiguish relevant sections from navigation, advertising, and other non-relevant elements. As
+analyzing text density to distinguish relevant sections from navigation, advertising, and other non-relevant elements. As
 such, the results are far from perfect but will hopefully improve as more sophisticated features are added.
+
+### DEPENDENCIES
+**Runtime**
+- Nokogiri
+
+**Development**
+- Red Carpet
+- RSpec
+- Yard
 
 ### INSTALL
 ```
-sudo gem install omnivore
+gem install omnivore
 ```
 
 ### EXAMPLE
