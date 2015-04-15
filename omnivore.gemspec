@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.version     = Omnivore::VERSION
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Matthias Eder"]
-  s.email       = ["matthias@izume.com"]
+  s.email       = ["nodeful@gmail.com"]
   s.homepage    = "http://github.com/matthiase/omnivore"
   s.summary     = %q{Content Extraction and Analysis Library}
   s.description = %q{A library for extracting content from HTML documents.}
