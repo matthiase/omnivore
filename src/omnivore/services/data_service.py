@@ -8,7 +8,7 @@ from omnivore import db
 
 
 class DataService:
-    """Handles fetching, cleaning, and storing OHLCV data."""
+    """Handles fetching, cleaning, and storing OHLCV data, and custom queries."""
 
     def get_instrument(self, symbol: str) -> dict | None:
         """Get instrument by symbol."""
@@ -221,3 +221,53 @@ class DataService:
             (instrument_id,)
         )
         return result["max_date"] if result else None
+
+    def execute(self, query: str, params: tuple = ()) -> list[dict]:
+        """Generic SQL execution for custom queries."""
+        return db.fetch_all(query, params)
+
+    def get_active_instruments(self) -> list[dict]:
+        """Get all active instruments."""
+        return self.execute(
+            "SELECT id, symbol, name FROM instruments WHERE is_active = true ORDER BY symbol"
+        )
+
+    def get_latest_predictions(self, horizon: str = "1d") -> list[dict]:
+        """Get latest prediction for each instrument for a given horizon."""
+        return self.execute(
+            """
+            SELECT p.instrument_id, p.predicted_value, p.target_date, i.symbol, i.name
+            FROM predictions p
+            JOIN instruments i ON p.instrument_id = i.id
+            WHERE p.horizon = %s
+            AND p.target_date = (
+                SELECT MAX(p2.target_date)
+                FROM predictions p2
+                WHERE p2.instrument_id = p.instrument_id
+                  AND p2.horizon = %s
+            )
+            ORDER BY i.symbol
+            """,
+            (horizon, horizon)
+        )
+
+    def get_accuracy_summary(self, horizon: str = "1d") -> list[dict]:
+        """Get accuracy summary for each instrument for a given horizon."""
+        return self.execute(
+            """
+            SELECT
+                i.id as instrument_id,
+                i.symbol,
+                COUNT(a.id) as n_predictions,
+                AVG(a.direction_correct::int) as directional_accuracy,
+                AVG(a.absolute_error) as mae
+            FROM instruments i
+            LEFT JOIN predictions p ON p.instrument_id = i.id
+            LEFT JOIN prediction_actuals a ON a.prediction_id = p.id
+            WHERE i.is_active = true
+              AND p.horizon = %s
+            GROUP BY i.id, i.symbol
+            ORDER BY i.symbol
+            """,
+            (horizon,)
+        )

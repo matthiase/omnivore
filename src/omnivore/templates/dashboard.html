@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Instrument Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Instrument Predictions</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Name</th>
+                <th>Latest Prediction</th>
+                <th>Target Date</th>
+                <th></th>Directional Accuracy</th>
+                <th>MAE</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for instrument in instruments %}
+            {% set pred = (predictions | selectattr('instrument_id', 'equalto', instrument.id) | list | first) %}
+            {% set acc = accuracy_map.get(instrument.id) %}
+            <tr>
+                <td>{{ instrument.symbol }}</td>
+                <td>{{ instrument.name }}</td>
+                <td>
+                    {% if pred %}
+                        {{ pred.predicted_value }}
+                    {% else %}
+                        &mdash;
+                    {% endif %}
+                </td>
+                <td>
+                    {% if pred %}
+                        {{ pred.target_date }}
+                    {% else %}
+                        &mdash;
+                    {% endif %}
+                </td>
+                <td>
+                    {% if acc and acc.directional_accuracy is not none %}
+                        {{ (acc.directional_accuracy * 100) | round(2) }}%
+                    {% else %}
+                        &mdash;
+                    {% endif %}
+                </td>
+                <td>
+                    {% if acc and acc.mae is not none %}
+                        {{ acc.mae | round(6) }}
+                    {% else %}
+                        &mdash;
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
