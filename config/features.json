@@ -1,0 +1,16 @@
+{
+  "features": [
+    {"name": "rsi_14", "type": "RSI", "params": {"period": 14}},
+    {"name": "ma_10", "type": "MA", "params": {"period": 10}},
+    {"name": "ma_20", "type": "MA", "params": {"period": 20}},
+    {"name": "ma_50", "type": "MA", "params": {"period": 50}},
+    {"name": "atr_14", "type": "ATR", "params": {"period": 14}},
+    {"name": "ma_cross_10_50", "type": "MA_CROSS", "params": {"fast": 10, "slow": 50}},
+    {"name": "rsi_oversold", "type": "THRESHOLD", "params": {"source": "rsi_14", "below": 30}},
+    {"name": "rsi_overbought", "type": "THRESHOLD", "params": {"source": "rsi_14", "above": 70}}
+  ],
+  "targets": [
+    {"name": "return_1d", "type": "future_return", "params": {"days": 1}},
+    {"name": "return_5d", "type": "future_return", "params": {"days": 5}}
+  ]
+}
