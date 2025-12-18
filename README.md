@@ -79,7 +79,7 @@ rq worker default training
 **Terminal 3 - Flask API:**
 ```bash
 source .venv/bin/activate
-flask --app src.omnivore.api.app run --debug
+flask --app src.omnivore.app run --debug
 ```
 
 The API is now running at `http://localhost:5000`.
