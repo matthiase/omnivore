@@ -8,7 +8,7 @@ This guide walks you through setting up Omnivore and generating your first predi
 
 ### Prerequisites
 
-- Python 3.11+
+- Python 3.13+
 - PostgreSQL 14+
 - Redis 7+
 
@@ -16,7 +16,7 @@ This guide walks you through setting up Omnivore and generating your first predi
 
 ```bash
 # Clone the repository
-git clone <your-repo-url>
+git clone git@github.com:matthiase/omnivore.git 
 cd omnivore
 
 # Install uv (if not already installed)
