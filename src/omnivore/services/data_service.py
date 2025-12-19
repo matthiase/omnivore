@@ -1,21 +1,13 @@
-# ============================================================================
-# FILE: src/omnivore/services/data_service.py
-# ============================================================================
-import yfinance as yf
-import pandas as pd
 from datetime import date, timedelta
-from omnivore import db
 
+import pandas as pd
+import yfinance as yf
 
 from omnivore.repositories.instrument_repository import InstrumentRepository
-from omnivore.repositories.prediction_repository import PredictionRepository
-from omnivore.repositories.ohlcv_repository import OhlcvRepository
 from omnivore.repositories.model_repository import ModelRepository
-import yfinance as yf
-import pandas as pd
-from datetime import date, timedelta
+from omnivore.repositories.ohlcv_repository import OhlcvRepository
+from omnivore.repositories.prediction_repository import PredictionRepository
 
-from typing import List, Optional
 
 class DataService:
     """
@@ -47,14 +39,16 @@ class DataService:
         df.columns = [c.lower().replace(" ", "_") for c in df.columns]
 
         # Ensure we have the expected columns
-        df = df.rename(columns={
-            "date": "date",
-            "open": "open",
-            "high": "high",
-            "low": "low",
-            "close": "close",
-            "volume": "volume",
-        })
+        df = df.rename(
+            columns={
+                "date": "date",
+                "open": "open",
+                "high": "high",
+                "low": "low",
+                "close": "close",
+                "volume": "volume",
+            }
+        )
 
         # Add adj_close (yfinance history already adjusts, so close = adj_close)
         df["adj_close"] = df["close"]
@@ -77,10 +71,10 @@ class DataService:
 
         # Ensure high >= open, close and low <= open, close
         df = df[
-            (df["high"] >= df["open"]) &
-            (df["high"] >= df["close"]) &
-            (df["low"] <= df["open"]) &
-            (df["low"] <= df["close"])
+            (df["high"] >= df["open"])
+            & (df["high"] >= df["close"])
+            & (df["low"] <= df["open"])
+            & (df["low"] <= df["close"])
         ]
 
         # Remove zero or negative prices
@@ -126,5 +120,5 @@ class DataService:
             "date_range": {
                 "start": str(df["date"].min()) if not df.empty else None,
                 "end": str(df["date"].max()) if not df.empty else None,
-            }
+            },
         }
