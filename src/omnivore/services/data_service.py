@@ -7,47 +7,26 @@ from datetime import date, timedelta
 from omnivore import db
 
 
+from omnivore.repositories.instrument_repository import InstrumentRepository
+from omnivore.repositories.prediction_repository import PredictionRepository
+from omnivore.repositories.ohlcv_repository import OhlcvRepository
+from omnivore.repositories.model_repository import ModelRepository
+import yfinance as yf
+import pandas as pd
+from datetime import date, timedelta
+
+from typing import List, Optional
+
 class DataService:
-    """Handles fetching, cleaning, and storing OHLCV data, and custom queries."""
+    """
+    Handles business logic and orchestration, using repositories for data access.
+    """
 
-    def get_instrument(self, symbol: str) -> dict | None:
-        """Get instrument by symbol."""
-        return db.fetch_one(
-            "SELECT * FROM instruments WHERE symbol = %s",
-            (symbol.upper(),)
-        )
-
-    def get_instrument_by_id(self, instrument_id: int) -> dict | None:
-        """Get instrument by ID."""
-        return db.fetch_one(
-            "SELECT * FROM instruments WHERE id = %s",
-            (instrument_id,)
-        )
-
-    def list_instruments(self, active_only: bool = True) -> list[dict]:
-        """List all instruments."""
-        if active_only:
-            return db.fetch_all(
-                "SELECT * FROM instruments WHERE is_active = true ORDER BY symbol"
-            )
-        return db.fetch_all("SELECT * FROM instruments ORDER BY symbol")
-
-    def create_instrument(
-        self,
-        symbol: str,
-        name: str = None,
-        asset_type: str = "stock",
-        exchange: str = None,
-    ) -> dict:
-        """Create a new instrument."""
-        return db.fetch_one(
-            """
-            INSERT INTO instruments (symbol, name, asset_type, exchange)
-            VALUES (%s, %s, %s, %s)
-            RETURNING *
-            """,
-            (symbol.upper(), name, asset_type, exchange)
-        )
+    def __init__(self):
+        self.instruments = InstrumentRepository()
+        self.predictions = PredictionRepository()
+        self.ohlcv = OhlcvRepository()
+        self.models = ModelRepository()
 
     def fetch_ohlcv(
         self,
@@ -117,56 +96,17 @@ class DataService:
 
         return df
 
-    def store_ohlcv(self, instrument_id: int, df: pd.DataFrame) -> int:
-        """Store OHLCV data in database. Returns count of rows inserted."""
-        if df.empty:
-            return 0
-
-        inserted = 0
-        with db.get_connection() as conn:
-            with conn.cursor() as cur:
-                for _, row in df.iterrows():
-                    try:
-                        cur.execute(
-                            """
-                            INSERT INTO ohlcv_daily
-                                (instrument_id, date, open, high, low, close, adj_close, volume)
-                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                            ON CONFLICT (instrument_id, date) DO UPDATE SET
-                                open = EXCLUDED.open,
-                                high = EXCLUDED.high,
-                                low = EXCLUDED.low,
-                                close = EXCLUDED.close,
-                                adj_close = EXCLUDED.adj_close,
-                                volume = EXCLUDED.volume,
-                                fetched_at = now()
-                            """,
-                            (
-                                instrument_id,
-                                row["date"],
-                                float(row["open"]),
-                                float(row["high"]),
-                                float(row["low"]),
-                                float(row["close"]),
-                                float(row["adj_close"]),
-                                int(row["volume"]) if pd.notna(row["volume"]) else None,
-                            )
-                        )
-                        inserted += 1
-                    except Exception as e:
-                        print(f"Error inserting row for date {row['date']}: {e}")
-                conn.commit()
-
-        return inserted
-
     def refresh_instrument(
         self,
         symbol: str,
         start_date: date = None,
         end_date: date = None,
     ) -> dict:
-        """Fetch, clean, and store data for an instrument."""
-        instrument = self.get_instrument(symbol)
+        """
+        Fetch, clean, and store data for an instrument.
+        Uses InstrumentRepository and OhlcvRepository.
+        """
+        instrument = self.instruments.get_by_symbol(symbol)
         if not instrument:
             raise ValueError(f"Instrument {symbol} not found")
 
@@ -176,7 +116,7 @@ class DataService:
 
         df = self.fetch_ohlcv(symbol, start_date, end_date)
         df = self.clean_ohlcv(df)
-        inserted = self.store_ohlcv(instrument["id"], df)
+        inserted = self.ohlcv.store_ohlcv(instrument["id"], df)
 
         return {
             "instrument_id": instrument["id"],
@@ -188,86 +128,3 @@ class DataService:
                 "end": str(df["date"].max()) if not df.empty else None,
             }
         }
-
-    def get_ohlcv(
-        self,
-        instrument_id: int,
-        start_date: date = None,
-        end_date: date = None,
-    ) -> pd.DataFrame:
-        """Retrieve OHLCV data from database as DataFrame."""
-        query = """
-            SELECT date, open, high, low, close, adj_close, volume
-            FROM ohlcv_daily
-            WHERE instrument_id = %s
-        """
-        params = [instrument_id]
-
-        if start_date:
-            query += " AND date >= %s"
-            params.append(start_date)
-        if end_date:
-            query += " AND date <= %s"
-            params.append(end_date)
-
-        query += " ORDER BY date"
-
-        return db.fetch_dataframe(query, tuple(params))
-
-    def get_latest_date(self, instrument_id: int) -> date | None:
-        """Get the most recent date we have data for."""
-        result = db.fetch_one(
-            "SELECT MAX(date) as max_date FROM ohlcv_daily WHERE instrument_id = %s",
-            (instrument_id,)
-        )
-        return result["max_date"] if result else None
-
-    def execute(self, query: str, params: tuple = ()) -> list[dict]:
-        """Generic SQL execution for custom queries."""
-        return db.fetch_all(query, params)
-
-    def get_active_instruments(self) -> list[dict]:
-        """Get all active instruments."""
-        return self.execute(
-            "SELECT id, symbol, name FROM instruments WHERE is_active = true ORDER BY symbol"
-        )
-
-    def get_latest_predictions(self, horizon: str = "1d") -> list[dict]:
-        """Get latest prediction for each instrument for a given horizon."""
-        return self.execute(
-            """
-            SELECT p.instrument_id, p.predicted_value, p.target_date, i.symbol, i.name
-            FROM predictions p
-            JOIN instruments i ON p.instrument_id = i.id
-            WHERE p.horizon = %s
-            AND p.target_date = (
-                SELECT MAX(p2.target_date)
-                FROM predictions p2
-                WHERE p2.instrument_id = p.instrument_id
-                  AND p2.horizon = %s
-            )
-            ORDER BY i.symbol
-            """,
-            (horizon, horizon)
-        )
-
-    def get_accuracy_summary(self, horizon: str = "1d") -> list[dict]:
-        """Get accuracy summary for each instrument for a given horizon."""
-        return self.execute(
-            """
-            SELECT
-                i.id as instrument_id,
-                i.symbol,
-                COUNT(a.id) as n_predictions,
-                AVG(a.direction_correct::int) as directional_accuracy,
-                AVG(a.absolute_error) as mae
-            FROM instruments i
-            LEFT JOIN predictions p ON p.instrument_id = i.id
-            LEFT JOIN prediction_actuals a ON a.prediction_id = p.id
-            WHERE i.is_active = true
-              AND p.horizon = %s
-            GROUP BY i.id, i.symbol
-            ORDER BY i.symbol
-            """,
-            (horizon,)
-        )
