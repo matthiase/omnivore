@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Instrument Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
+{% extends 'layouts/base.html' %}
+
+{% block title %}Instrument Dashboard{% endblock %}
+
+{% block content %}
     <h1>Instrument Predictions</h1>
     <table>
         <thead>
@@ -14,41 +11,39 @@
                 <th>Name</th>
                 <th>Latest Prediction</th>
                 <th>Target Date</th>
-                <th></th>Directional Accuracy</th>
+                <th>Directional Accuracy</th>
                 <th>MAE</th>
             </tr>
         </thead>
         <tbody>
-        {% for instrument in instruments %}
-            {% set pred = (predictions | selectattr('instrument_id', 'equalto', instrument.id) | list | first) %}
-            {% set acc = accuracy_map.get(instrument.id) %}
+        {% for row in instrument_rows %}
             <tr>
-                <td>{{ instrument.symbol }}</td>
-                <td>{{ instrument.name }}</td>
+                <td>{{ row['instrument']['symbol'] }}</td>
+                <td>{{ row['instrument']['name'] }}</td>
                 <td>
-                    {% if pred %}
-                        {{ pred.predicted_value }}
+                    {% if row['prediction'] %}
+                        {{ row['prediction']['predicted_value'] }}
                     {% else %}
                         &mdash;
                     {% endif %}
                 </td>
                 <td>
-                    {% if pred %}
-                        {{ pred.target_date }}
+                    {% if row['prediction'] %}
+                        {{ row['prediction']['target_date'] }}
                     {% else %}
                         &mdash;
                     {% endif %}
                 </td>
                 <td>
-                    {% if acc and acc.directional_accuracy is not none %}
-                        {{ (acc.directional_accuracy * 100) | round(2) }}%
+                    {% if row['accuracy'] and row['accuracy']['directional_accuracy'] is not none %}
+                        {{ row['accuracy']['directional_accuracy'] * 100 | round(2) }}%
                     {% else %}
                         &mdash;
                     {% endif %}
                 </td>
                 <td>
-                    {% if acc and acc.mae is not none %}
-                        {{ acc.mae | round(6) }}
+                    {% if row['accuracy'] and row['accuracy']['mae'] is not none %}
+                        {{ row['accuracy']['mae'] | round(6) }}
                     {% else %}
                         &mdash;
                     {% endif %}
@@ -57,6 +52,4 @@
         {% endfor %}
         </tbody>
     </table>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-</body>
-</html>
+{% endblock %}

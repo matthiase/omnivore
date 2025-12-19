@@ -11,9 +11,19 @@ def dashboard():
     accuracy = ds.predictions.get_accuracy_summary(horizon="1d")
     accuracy_map = {row["instrument_id"]: row for row in accuracy}
 
+    # Precompute rows for the template
+    instrument_rows = []
+    pred_map = {p["instrument_id"]: p for p in predictions}
+    for instrument in instruments:
+        pred = pred_map.get(instrument["id"])
+        acc = accuracy_map.get(instrument["id"])
+        instrument_rows.append({
+            "instrument": instrument,
+            "prediction": pred,
+            "accuracy": acc,
+        })
+
     return render_template(
         "dashboard.html",
-        predictions=predictions,
-        accuracy_map=accuracy_map,
-        instruments=instruments,
+        instrument_rows=instrument_rows,
     )
