@@ -27,26 +27,26 @@ uv venv
 source .venv/bin/activate
 uv pip install -e ".[dev]"
 ```
-
-### 2. Configuration
-Create a `.env` with your configuration. For example:
-
-```env
-DATABASE_URL=postgresql://omnivore:@localhost:5432/omnivore
-REDIS_URL=redis://localhost:6379/0
-MODEL_STORAGE_PATH=./models
-FEATURES_CONFIG_PATH=./config/features.json
-```
-
-### 3. Database Setup
+### 2. Database Setup
 
 ```bash
 # Create the PostgreSQL user and database
-sudo -u postgres createuser omnivore
+sudo -u postgres createuser omnivore --createdb
 sudo -u postgres createdb omnivore --owner=omnivore
 
 # Run migrations
 psql postgresql://omnivore:@localhost:5432/omnivore -f migrations/001_initial_schema.sql
+
+```
+### 3. Configuration
+Create a `.env` with your configuration. For example:
+
+```env
+OMNIVORE_ENV=development
+DATABASE_URL=postgresql://omnivore:@localhost:5432/omnivore
+REDIS_URL=redis://localhost:6379/0
+MODEL_STORAGE_PATH=./models
+FEATURES_CONFIG_PATH=./config/features.json
 ```
 
 ### 4. Initialize Data
@@ -95,6 +95,24 @@ curl http://localhost:5000/api/instruments
 ```
 
 You should see the four seeded ETFs.
+
+---
+
+## Running Tests
+
+Create a `.env.test` with your configuration. For example:
+
+```env
+OMNIVORE_ENV=test
+DATABASE_URL=postgresql://omnivore:@localhost:5432/omnivore_test
+REDIS_URL=redis://localhost:6379/1
+MODEL_STORAGE_PATH=./models_test
+FEATURES_CONFIG_PATH=./config/features.json
+```
+
+```bash
+OMNIVORE_ENV=test python -m pytest
+```
 
 ---
 
