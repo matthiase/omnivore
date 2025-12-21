@@ -5,7 +5,6 @@ Run with: OMNIVORE_ENV=test pytest src/omnivore/ohlcv/repository_test.py -v
 """
 
 from datetime import date
-from decimal import Decimal
 
 import pandas as pd
 import pytest

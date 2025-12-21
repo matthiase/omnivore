@@ -161,7 +161,7 @@ class PredictionService:
         updated = 0
         for pred in predictions:
             # Get price data for prediction_date and target_date
-            df = data_service.find(
+            df = data_service.fetch_ohlcv(
                 instrument_id=instrument_id,
                 start_date=pred["prediction_date"],
                 end_date=pred["target_date"],
