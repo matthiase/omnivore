@@ -1,9 +1,8 @@
-# ============================================================================
-# FILE: src/omnivore/repositories/ohlcv_repository.py
-# ============================================================================
-from typing import Optional, List
 from datetime import date
+from typing import Optional
+
 import pandas as pd
+
 from omnivore import db
 
 
@@ -13,7 +12,7 @@ class OhlcvRepository:
     Encapsulates all SQL and queries for the ohlcv_daily table.
     """
 
-    def get_ohlcv(
+    def find(
         self,
         instrument_id: int,
         start_date: date = None,
@@ -46,7 +45,7 @@ class OhlcvRepository:
         """
         result = db.fetch_one(
             "SELECT MAX(date) as max_date FROM ohlcv_daily WHERE instrument_id = %s",
-            (instrument_id,)
+            (instrument_id,),
         )
         return result["max_date"] if result else None
 
@@ -85,7 +84,7 @@ class OhlcvRepository:
                                 float(row["close"]),
                                 float(row["adj_close"]),
                                 int(row["volume"]) if pd.notna(row["volume"]) else None,
-                            )
+                            ),
                         )
                         inserted += 1
                     except Exception as e:

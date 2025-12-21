@@ -1,10 +1,12 @@
 # ============================================================================
 # FILE: src/omnivore/services/feature_engine.py
 # ============================================================================
+from datetime import date
+
+import numpy as np
 import pandas as pd
 import pandas_ta as ta
-import numpy as np
-from datetime import date
+
 from omnivore import db
 from omnivore.config import config
 from omnivore.services.data_service import DataService
@@ -152,7 +154,8 @@ class FeatureEngine:
                         col_str = ", ".join(cols)
                         placeholder_str = ", ".join(placeholders)
                         update_str = ", ".join(
-                            f"{c} = EXCLUDED.{c}" for c in cols[2:]  # Skip id and date
+                            f"{c} = EXCLUDED.{c}"
+                            for c in cols[2:]  # Skip id and date
                         )
 
                         query = f"""
@@ -180,7 +183,7 @@ class FeatureEngine:
     ) -> dict:
         """Compute and store features for an instrument."""
         # Get OHLCV data
-        df = self.data_service.get_ohlcv(instrument_id, start_date, end_date)
+        df = self.data_service.find(instrument_id, start_date, end_date)
 
         if df.empty:
             return {
@@ -202,7 +205,7 @@ class FeatureEngine:
             "date_range": {
                 "start": str(df["date"].min()),
                 "end": str(df["date"].max()),
-            }
+            },
         }
 
     def get_features(

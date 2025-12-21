@@ -3,9 +3,9 @@ from datetime import date, timedelta
 import pandas as pd
 import yfinance as yf
 
+from omnivore.ohlcv import OhlcvRepository
 from omnivore.repositories.instrument_repository import InstrumentRepository
 from omnivore.repositories.model_repository import ModelRepository
-from omnivore.repositories.ohlcv_repository import OhlcvRepository
 from omnivore.repositories.prediction_repository import PredictionRepository
 
 
