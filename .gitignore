@@ -11,7 +11,11 @@ wheels/
 
 # Environment files
 .env
+.env.*
 
 # Editor-specific files
 .vscode/
 .zed/
+
+# Models
+models/

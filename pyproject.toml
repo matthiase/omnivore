@@ -33,6 +33,7 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/omnivore"]
+exclude = ["*_test.py", "conftest.py"]
 
 [tool.ruff]
 line-length = 100
