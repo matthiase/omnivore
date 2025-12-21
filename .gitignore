@@ -15,3 +15,6 @@ wheels/
 # Editor-specific files
 .vscode/
 .zed/
+
+# Models
+models/
