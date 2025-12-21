@@ -169,36 +169,34 @@ def prediction_service(db_connection):
 # =============================================================================
 
 
-# @pytest.fixture
-# def sample_instrument(db_connection) -> "Instrument":
-#    """Create a single test instrument."""
-#    from omnivore.repositories import InstrumentRepository
-#
-#    repo = InstrumentRepository()
-#    return repo.create(
-#        NewInstrument(
-#            symbol="TEST",
-#            name="Test Instrument",
-#            asset_type="stock",
-#            exchange="NYSE",
-#        )
-#    )
+@pytest.fixture
+def sample_instrument(db_connection) -> dict:
+    """Create a single test instrument."""
+    from omnivore.repositories.instrument_repository import InstrumentRepository
+
+    repo = InstrumentRepository()
+    return repo.create(
+        symbol="TEST",
+        name="Test Instrument",
+        asset_type="stock",
+        exchange="NYSE",
+    )
 
 
-# @pytest.fixture
-# def sample_instruments(db_connection) -> list["Instrument"]:
-#    """Create multiple test instruments."""
-#    from omnivore.repositories import InstrumentRepository
-#
-#    repo = InstrumentRepository()
-#
-#    instruments = [
-#        NewInstrument(symbol="TEST1", name="Test Stock 1", asset_type="stock", exchange="NYSE"),
-#        NewInstrument(symbol="TEST2", name="Test Stock 2", asset_type="stock", exchange="NASDAQ"),
-#        NewInstrument(symbol="TESTETF", name="Test ETF", asset_type="etf", exchange="NYSE"),
-#    ]
-#
-#    return [repo.create(i) for i in instruments]
+@pytest.fixture
+def sample_instruments(db_connection) -> list[dict]:
+    """Create multiple test instruments."""
+    from omnivore.repositories.instrument_repository import InstrumentRepository
+
+    repo = InstrumentRepository()
+
+    instruments = [
+        {"symbol": "TEST1", "name": "Test Stock 1", "asset_type": "stock", "exchange": "NYSE"},
+        {"symbol": "TEST2", "name": "Test Stock 2", "asset_type": "stock", "exchange": "NASDAQ"},
+        {"symbol": "TESTETF", "name": "Test ETF", "asset_type": "etf", "exchange": "NYSE"},
+    ]
+
+    return [repo.create(**i) for i in instruments]
 
 
 @pytest.fixture
@@ -217,7 +215,7 @@ def sample_ohlcv(db_connection, sample_instrument) -> dict:
 
     with db_connection.cursor() as cur:
         base_price = Decimal("100.00")
-        current_date = date(2024, 1, 1)
+        current_date = date.today() - timedelta(days=365)
 
         for i in range(100):
             # Skip weekends

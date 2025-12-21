@@ -9,13 +9,14 @@ For testing, use set_connection_override() to inject a connection
 that will be used instead of creating new ones. This enables
 transaction rollback between tests.
 """
-import psycopg
-from psycopg.rows import dict_row
+
 from contextlib import contextmanager
 from typing import Any
 
-from omnivore.config import config
+import psycopg
+from psycopg.rows import dict_row
 
+from omnivore.config import config
 
 # =============================================================================
 # Connection Override (for testing)
@@ -47,6 +48,7 @@ def clear_connection_override() -> None:
 # =============================================================================
 # Connection Management
 # =============================================================================
+
 
 @contextmanager
 def get_connection():
@@ -104,6 +106,7 @@ def get_cursor():
 # =============================================================================
 # Query Helpers
 # =============================================================================
+
 
 def execute(query: str, params: tuple = None) -> None:
     """
@@ -177,6 +180,7 @@ def fetch_dataframe(query: str, params: tuple = None):
 # Batch Operations
 # =============================================================================
 
+
 def execute_many(query: str, params_list: list[tuple]) -> int:
     """
     Execute a query multiple times with different parameters.
@@ -209,14 +213,12 @@ def execute_batch(query: str, params_list: list[tuple], page_size: int = 100) ->
     Returns:
         Number of parameter sets processed
     """
-    from psycopg import sql
-
     with get_cursor() as cur:
         # psycopg3 doesn't have execute_batch like psycopg2
         # Fall back to executemany with chunking
         total = 0
         for i in range(0, len(params_list), page_size):
-            chunk = params_list[i:i + page_size]
+            chunk = params_list[i : i + page_size]
             cur.executemany(query, chunk)
             total += len(chunk)
         return total
