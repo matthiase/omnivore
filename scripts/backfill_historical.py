@@ -7,11 +7,11 @@ from omnivore.services import FeatureEngine
 
 
 def main():
-    instruments = InstrumentService()
+    instrument_service = InstrumentService()
     feature_engine = FeatureEngine()
 
     # Get all active instruments
-    instruments = instruments.repository.list_instruments(active_only=True)
+    instruments = instrument_service.repository.list_instruments(active_only=True)
 
     # Backfill 5 years of data
     start_date = date.today() - timedelta(days=5 * 365)
