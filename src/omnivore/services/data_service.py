@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 
+from omnivore.instrument import InstrumentRepository
 from omnivore.ohlcv import OhlcvRepository
-from omnivore.repositories.instrument_repository import InstrumentRepository
 from omnivore.repositories.model_repository import ModelRepository
 from omnivore.repositories.prediction_repository import PredictionRepository
 

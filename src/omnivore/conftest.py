@@ -130,7 +130,7 @@ def db_cursor(db_connection):
 @pytest.fixture
 def instrument_repo(db_connection):
     """Provide an InstrumentRepository instance."""
-    from omnivore.repositories import InstrumentRepository
+    from omnivore.instrument import InstrumentRepository
 
     return InstrumentRepository()
 
@@ -180,7 +180,7 @@ def prediction_service(db_connection):
 @pytest.fixture
 def sample_instrument(db_connection) -> dict:
     """Create a single test instrument."""
-    from omnivore.repositories.instrument_repository import InstrumentRepository
+    from omnivore.instrument import InstrumentRepository
 
     repo = InstrumentRepository()
     return repo.create(
@@ -194,7 +194,7 @@ def sample_instrument(db_connection) -> dict:
 @pytest.fixture
 def sample_instruments(db_connection) -> list[dict]:
     """Create multiple test instruments."""
-    from omnivore.repositories.instrument_repository import InstrumentRepository
+    from omnivore.instrument import InstrumentRepository
 
     repo = InstrumentRepository()
 

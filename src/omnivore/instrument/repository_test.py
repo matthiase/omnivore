@@ -3,20 +3,24 @@ Integration tests for InstrumentRepository.
 
 Run with: OMNIVORE_ENV=test pytest src/omnivore/repositories/instrument_repository_test.py -v
 """
+
 import pytest
 from psycopg.errors import UniqueViolation
 
-from omnivore.repositories.instrument_repository import InstrumentRepository
+from omnivore.instrument.repository import InstrumentRepository
 
 
 class TestCreate:
     """Tests for InstrumentRepository.create()"""
 
-    @pytest.mark.parametrize("symbol,name,asset_type,exchange", [
-        ("AAPL", "Apple Inc.", "stock", "NASDAQ"),
-        ("SPY", "SPDR S&P 500 ETF", "etf", "NYSE"),
-        ("msft", None, "stock", None),  # lowercase, minimal fields
-    ])
+    @pytest.mark.parametrize(
+        "symbol,name,asset_type,exchange",
+        [
+            ("AAPL", "Apple Inc.", "stock", "NASDAQ"),
+            ("SPY", "SPDR S&P 500 ETF", "etf", "NYSE"),
+            ("msft", None, "stock", None),  # lowercase, minimal fields
+        ],
+    )
     def test_create_success(self, db_connection, symbol, name, asset_type, exchange):
         repo = InstrumentRepository()
 
@@ -41,10 +45,13 @@ class TestCreate:
 class TestGetById:
     """Tests for InstrumentRepository.get_by_id()"""
 
-    @pytest.mark.parametrize("symbol,asset_type", [
-        ("AAPL", "stock"),
-        ("SPY", "etf"),
-    ])
+    @pytest.mark.parametrize(
+        "symbol,asset_type",
+        [
+            ("AAPL", "stock"),
+            ("SPY", "etf"),
+        ],
+    )
     def test_get_by_id_success(self, db_connection, symbol, asset_type):
         repo = InstrumentRepository()
         created = repo.create(symbol=symbol, asset_type=asset_type)
@@ -66,11 +73,14 @@ class TestGetById:
 class TestGetBySymbol:
     """Tests for InstrumentRepository.get_by_symbol()"""
 
-    @pytest.mark.parametrize("stored_symbol,lookup_symbol", [
-        ("AAPL", "AAPL"),   # exact match
-        ("MSFT", "msft"),   # lowercase lookup
-        ("GOOG", "gOoG"),   # mixed case lookup
-    ])
+    @pytest.mark.parametrize(
+        "stored_symbol,lookup_symbol",
+        [
+            ("AAPL", "AAPL"),  # exact match
+            ("MSFT", "msft"),  # lowercase lookup
+            ("GOOG", "gOoG"),  # mixed case lookup
+        ],
+    )
     def test_get_by_symbol_success(self, db_connection, stored_symbol, lookup_symbol):
         repo = InstrumentRepository()
         repo.create(symbol=stored_symbol, asset_type="stock")
@@ -91,10 +101,13 @@ class TestGetBySymbol:
 class TestList:
     """Tests for InstrumentRepository.list()"""
 
-    @pytest.mark.parametrize("active_only,expected_count", [
-        (True, 2),   # Only active instruments
-        (False, 3),  # All instruments including deactivated
-    ])
+    @pytest.mark.parametrize(
+        "active_only,expected_count",
+        [
+            (True, 2),  # Only active instruments
+            (False, 3),  # All instruments including deactivated
+        ],
+    )
     def test_list(self, db_connection, active_only, expected_count):
         repo = InstrumentRepository()
         repo.create(symbol="ACTIVE1", asset_type="stock")
@@ -103,8 +116,7 @@ class TestList:
 
         # Deactivate one instrument directly via SQL
         db_connection.execute(
-            "UPDATE instruments SET is_active = false WHERE id = %s",
-            (inactive["id"],)
+            "UPDATE instruments SET is_active = false WHERE id = %s", (inactive["id"],)
         )
 
         result = repo.list(active_only=active_only)
@@ -123,11 +135,14 @@ class TestList:
 class TestGetActiveInstruments:
     """Tests for InstrumentRepository.get_active_instruments()"""
 
-    @pytest.mark.parametrize("num_active,num_inactive", [
-        (3, 0),  # All active
-        (2, 1),  # Some inactive
-        (0, 2),  # All inactive
-    ])
+    @pytest.mark.parametrize(
+        "num_active,num_inactive",
+        [
+            (3, 0),  # All active
+            (2, 1),  # Some inactive
+            (0, 2),  # All inactive
+        ],
+    )
     def test_get_active_instruments(self, db_connection, num_active, num_inactive):
         repo = InstrumentRepository()
 
@@ -139,8 +154,7 @@ class TestGetActiveInstruments:
         for i in range(num_inactive):
             inactive = repo.create(symbol=f"INACTIVE{i}", asset_type="stock")
             db_connection.execute(
-                "UPDATE instruments SET is_active = false WHERE id = %s",
-                (inactive["id"],)
+                "UPDATE instruments SET is_active = false WHERE id = %s", (inactive["id"],)
             )
 
         result = repo.get_active_instruments()
