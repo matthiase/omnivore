@@ -2,24 +2,25 @@
 # FILE: src/omnivore/jobs/tasks.py
 # ============================================================================
 """RQ task definitions for background job processing."""
+
 from datetime import date, timedelta
+
+from omnivore.instrument.service import InstrumentService
 from omnivore.services import (
-    DataService,
+    DriftMonitor,
     FeatureEngine,
     ModelRegistry,
     PredictionService,
-    DriftMonitor,
 )
 
 
 def refresh_data_job(symbol: str, start_date: str = None, end_date: str = None) -> dict:
     """Fetch and store latest OHLCV data for an instrument."""
-    data_service = DataService()
-
+    instruments = InstrumentService()
     start = date.fromisoformat(start_date) if start_date else None
     end = date.fromisoformat(end_date) if end_date else None
 
-    return data_service.refresh_instrument(symbol, start, end)
+    return instruments.refresh(symbol, start, end)
 
 
 def compute_features_job(instrument_id: int, start_date: str = None, end_date: str = None) -> dict:

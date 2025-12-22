@@ -1,17 +1,17 @@
-# ============================================================================
-# FILE: scripts/backfill_historical.py
-# ============================================================================
 """Backfill historical data for all active instruments."""
+
 from datetime import date, timedelta
-from omnivore.services import DataService, FeatureEngine
+
+from omnivore.instrument import InstrumentService
+from omnivore.services import FeatureEngine
 
 
 def main():
-    data_service = DataService()
+    instruments = InstrumentService()
     feature_engine = FeatureEngine()
 
     # Get all active instruments
-    instruments = data_service.list_instruments(active_only=True)
+    instruments = instruments.repository.list_instruments(active_only=True)
 
     # Backfill 5 years of data
     start_date = date.today() - timedelta(days=5 * 365)
@@ -21,7 +21,7 @@ def main():
 
         # Fetch OHLCV data
         print("  Fetching OHLCV data...")
-        result = data_service.refresh_instrument(
+        result = instruments.refresh(
             symbol=instrument["symbol"],
             start_date=start_date,
         )
