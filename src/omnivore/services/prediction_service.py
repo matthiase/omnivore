@@ -1,9 +1,8 @@
 # ============================================================================
 # FILE: src/omnivore/services/prediction_service.py
 # ============================================================================
-import json
 from datetime import date, timedelta
-import pandas as pd
+
 from omnivore import db
 from omnivore.services.feature_engine import FeatureEngine
 from omnivore.services.model_registry import ModelRegistry
@@ -30,7 +29,7 @@ class PredictionService:
             raise ValueError(f"No active version for model {model_id}")
 
         # Get model definition for target info
-        model_def = self.model_registry.get_model(model_id)
+        self.model_registry.get_model(model_id)
 
         # Determine target date based on horizon
         days = int(horizon.replace("d", ""))
@@ -68,7 +67,7 @@ class PredictionService:
                 target_date,
                 horizon,
                 float(predicted_value),
-            )
+            ),
         )
 
         return {
@@ -100,28 +99,25 @@ class PredictionService:
                     )
                     results.append(result)
                 except Exception as e:
-                    results.append({
-                        "instrument_id": instrument_id,
-                        "horizon": horizon,
-                        "error": str(e),
-                    })
+                    results.append(
+                        {
+                            "instrument_id": instrument_id,
+                            "horizon": horizon,
+                            "error": str(e),
+                        }
+                    )
 
         return results
 
     def record_actual(self, prediction_id: int, actual_value: float) -> dict:
         """Record the actual outcome for a prediction."""
-        prediction = db.fetch_one(
-            "SELECT * FROM predictions WHERE id = %s",
-            (prediction_id,)
-        )
+        prediction = db.fetch_one("SELECT * FROM predictions WHERE id = %s", (prediction_id,))
 
         if not prediction:
             raise ValueError(f"Prediction {prediction_id} not found")
 
         error = prediction["predicted_value"] - actual_value
-        direction_correct = (
-            (prediction["predicted_value"] > 0) == (actual_value > 0)
-        )
+        direction_correct = (prediction["predicted_value"] > 0) == (actual_value > 0)
 
         return db.fetch_one(
             """
@@ -136,7 +132,7 @@ class PredictionService:
                 recorded_at = now()
             RETURNING *
             """,
-            (prediction_id, actual_value, error, abs(error), direction_correct)
+            (prediction_id, actual_value, error, abs(error), direction_correct),
         )
 
     def backfill_actuals(self, instrument_id: int) -> dict:
@@ -151,20 +147,21 @@ class PredictionService:
               AND p.target_date <= CURRENT_DATE
             ORDER BY p.target_date
             """,
-            (instrument_id,)
+            (instrument_id,),
         )
 
         if not predictions:
             return {"updated": 0, "message": "No predictions to backfill"}
 
-        # Get OHLCV data for calculating actuals
-        from omnivore.services.data_service import DataService
-        data_service = DataService()
+        # Fetch the OHLCV data from the upstream provider
+        from omnivore.ohlcv import OhlcvService
+
+        ohlcv = OhlcvService()
 
         updated = 0
         for pred in predictions:
             # Get price data for prediction_date and target_date
-            df = data_service.get_ohlcv(
+            df = ohlcv.fetch(
                 instrument_id=instrument_id,
                 start_date=pred["prediction_date"],
                 end_date=pred["target_date"],

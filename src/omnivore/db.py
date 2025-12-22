@@ -1,4 +1,3 @@
-# src/omnivore/db.py
 """
 Database connection and query utilities.
 
@@ -173,7 +172,11 @@ def fetch_dataframe(query: str, params: tuple = None):
     import pandas as pd
 
     with get_connection() as conn:
-        return pd.read_sql(query, conn, params=params)
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(query, params)
+            rows = cur.fetchall()
+            columns = [desc.name for desc in cur.description] if cur.description else []
+            return pd.DataFrame(rows, columns=columns)
 
 
 # =============================================================================

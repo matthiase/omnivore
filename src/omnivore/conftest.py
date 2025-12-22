@@ -22,8 +22,6 @@ from psycopg.rows import dict_row
 from omnivore import db
 from omnivore.config import config
 
-# from omnivore.models.instrument import NewInstrument
-
 # =============================================================================
 # Database Fixtures
 # =============================================================================
@@ -95,6 +93,16 @@ def db_connection(test_db):
     truncating tables between tests.
     """
     conn = psycopg.connect(config.database_url)
+
+    # Clean slate: truncate all tables before each test
+    with conn.cursor() as cur:
+        cur.execute("""
+            TRUNCATE instruments, ohlcv_daily, features_daily,
+                     models, model_versions, predictions,
+                     prediction_actuals, drift_reports
+            RESTART IDENTITY CASCADE
+        """)
+    conn.commit()
 
     # Override the db module to use this connection
     db.set_connection_override(conn)
