@@ -153,15 +153,15 @@ class PredictionService:
         if not predictions:
             return {"updated": 0, "message": "No predictions to backfill"}
 
-        # Get OHLCV data for calculating actuals
-        from omnivore.services.data_service import DataService
+        # Fetch the OHLCV data from the upstream provider
+        from omnivore.ohlcv import OhlcvService
 
-        data_service = DataService()
+        ohlcv = OhlcvService()
 
         updated = 0
         for pred in predictions:
             # Get price data for prediction_date and target_date
-            df = data_service.fetch_ohlcv(
+            df = ohlcv.fetch(
                 instrument_id=instrument_id,
                 start_date=pred["prediction_date"],
                 end_date=pred["target_date"],
