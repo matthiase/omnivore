@@ -3,7 +3,7 @@ from datetime import date, timedelta
 import pandas as pd
 import yfinance as yf
 
-from omnivore.ohlcv import OhlcvRepository
+from omnivore.ohlcv.repository import OhlcvRepository
 
 
 class OhlcvService:
@@ -31,18 +31,6 @@ class OhlcvService:
         # Normalize column names
         df = df.reset_index()
         df.columns = [c.lower().replace(" ", "_") for c in df.columns]
-
-        # Ensure we have the expected columns
-        df = df.rename(
-            columns={
-                "date": "date",
-                "open": "open",
-                "high": "high",
-                "low": "low",
-                "close": "close",
-                "volume": "volume",
-            }
-        )
 
         # Add adj_close (yfinance history already adjusts, so close = adj_close)
         df["adj_close"] = df["close"]
