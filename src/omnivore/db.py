@@ -170,13 +170,19 @@ def fetch_dataframe(query: str, params: tuple = None):
         pandas.DataFrame with query results
     """
     import pandas as pd
+    import decimal
 
     with get_connection() as conn:
         with conn.cursor(row_factory=dict_row) as cur:
             cur.execute(query, params)
             rows = cur.fetchall()
             columns = [desc.name for desc in cur.description] if cur.description else []
-            return pd.DataFrame(rows, columns=columns)
+            df = pd.DataFrame(rows, columns=columns)
+            # Convert decimal.Decimal columns to float for numeric compatibility
+            for col in df.columns:
+                if df[col].apply(lambda x: isinstance(x, decimal.Decimal)).all():
+                    df[col] = df[col].astype(float)
+            return df
 
 
 # =============================================================================
