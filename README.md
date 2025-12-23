@@ -362,10 +362,23 @@ curl "http://localhost:5000/api/jobs/drift/reports?model_version_id=1"
 
 ```bash
 # Refresh SPY data
-curl -X POST http://localhost:5000/api/instruments/1/refresh
+curl -X POST http://localhost:5000/api/instruments/1/refresh \
+  -H "Content-Type: application/json" \
+  -d '{}'
 
 # Recompute features
-curl -X POST http://localhost:5000/api/instruments/1/features
+curl -X POST http://localhost:5000/api/instruments/1/features \
+  -H "Content-Type: application/json" \
+  -d '{}'
+
+# Generate daily predictions
+curl -X POST http://localhost:5000/api/predictions/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model_id": 1,
+    "instrument_ids": [1],
+    "horizons": ["1d"]
+  }'
 ```
 
 ### Generate Daily Predictions
