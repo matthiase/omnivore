@@ -138,8 +138,9 @@ def instrument_repo(db_connection):
 @pytest.fixture
 def model_repo(db_connection):
     """Provide a ModelRepository instance (when implemented)."""
-    # from omnivore.repositories import ModelRepository
-    # return ModelRepository()
+    from omnivore.model import ModelRepository
+
+    return ModelRepository()
     pass
 
 
@@ -167,7 +168,7 @@ def feature_engine(db_connection):
 @pytest.fixture
 def prediction_service(db_connection):
     """Provide a PredictionService instance."""
-    from omnivore.services import PredictionService
+    from omnivore.prediction import PredictionService
 
     return PredictionService()
 

@@ -1,6 +1,3 @@
-# ============================================================================
-# FILE: src/omnivore/services/drift_monitor.py
-# ============================================================================
 import json
 from datetime import date, timedelta
 import numpy as np

@@ -1,7 +1,5 @@
-# ============================================================================
-# FILE: src/omnivore/repositories/model_repository.py
-# ============================================================================
-from typing import Optional, List
+from typing import List, Optional
+
 from omnivore import db
 
 
@@ -13,23 +11,15 @@ class ModelRepository:
 
     def get_by_id(self, model_id: int) -> Optional[dict]:
         """Get a model by its ID."""
-        return db.fetch_one(
-            "SELECT * FROM models WHERE id = %s",
-            (model_id,)
-        )
+        return db.fetch_one("SELECT * FROM models WHERE id = %s", (model_id,))
 
     def get_by_name(self, name: str) -> Optional[dict]:
         """Get a model by its unique name."""
-        return db.fetch_one(
-            "SELECT * FROM models WHERE name = %s",
-            (name,)
-        )
+        return db.fetch_one("SELECT * FROM models WHERE name = %s", (name,))
 
     def list(self) -> List[dict]:
         """List all models."""
-        return db.fetch_all(
-            "SELECT * FROM models ORDER BY created_at DESC"
-        )
+        return db.fetch_all("SELECT * FROM models ORDER BY created_at DESC")
 
     def create(
         self,
@@ -47,30 +37,25 @@ class ModelRepository:
             VALUES (%s, %s, %s, %s, %s, %s)
             RETURNING *
             """,
-            (name, description, target, model_type, feature_config, hyperparameters or {})
+            (name, description, target, model_type, feature_config, hyperparameters or {}),
         )
 
     # Model Versions
 
     def get_version_by_id(self, version_id: int) -> Optional[dict]:
         """Get a model version by its ID."""
-        return db.fetch_one(
-            "SELECT * FROM model_versions WHERE id = %s",
-            (version_id,)
-        )
+        return db.fetch_one("SELECT * FROM model_versions WHERE id = %s", (version_id,))
 
     def list_versions(self, model_id: int) -> List[dict]:
         """List all versions for a given model."""
         return db.fetch_all(
-            "SELECT * FROM model_versions WHERE model_id = %s ORDER BY version DESC",
-            (model_id,)
+            "SELECT * FROM model_versions WHERE model_id = %s ORDER BY version DESC", (model_id,)
         )
 
     def get_active_version(self, model_id: int) -> Optional[dict]:
         """Get the active version for a given model."""
         return db.fetch_one(
-            "SELECT * FROM model_versions WHERE model_id = %s AND is_active = true",
-            (model_id,)
+            "SELECT * FROM model_versions WHERE model_id = %s AND is_active = true", (model_id,)
         )
 
     def create_version(
@@ -93,7 +78,7 @@ class ModelRepository:
             VALUES (%s, %s, %s, %s, %s, %s, %s)
             RETURNING *
             """,
-            (model_id, version, training_start, training_end, metrics, artifact_path, is_active)
+            (model_id, version, training_start, training_end, metrics, artifact_path, is_active),
         )
 
     def activate_version(self, model_id: int, version: int) -> Optional[dict]:
@@ -102,12 +87,9 @@ class ModelRepository:
         Returns the activated version.
         """
         # Deactivate all other versions
-        db.execute(
-            "UPDATE model_versions SET is_active = false WHERE model_id = %s",
-            (model_id,)
-        )
+        db.execute("UPDATE model_versions SET is_active = false WHERE model_id = %s", (model_id,))
         # Activate the specified version
         return db.fetch_one(
             "UPDATE model_versions SET is_active = true WHERE model_id = %s AND version = %s RETURNING *",
-            (model_id, version)
+            (model_id, version),
         )

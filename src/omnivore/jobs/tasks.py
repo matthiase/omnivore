@@ -1,17 +1,11 @@
-# ============================================================================
-# FILE: src/omnivore/jobs/tasks.py
-# ============================================================================
 """RQ task definitions for background job processing."""
 
 from datetime import date, timedelta
 
 from omnivore.instrument.service import InstrumentService
-from omnivore.services import (
-    DriftMonitor,
-    FeatureEngine,
-    ModelRegistry,
-    PredictionService,
-)
+from omnivore.model import DriftMonitor, ModelRegistry
+from omnivore.prediction import PredictionService
+from omnivore.services import FeatureEngine
 
 
 def refresh_data_job(symbol: str, start_date: str = None, end_date: str = None) -> dict:

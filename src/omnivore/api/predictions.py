@@ -1,10 +1,12 @@
 # ============================================================================
 # FILE: src/omnivore/api/routes/predictions.py
 # ============================================================================
-from flask import Blueprint, request, jsonify, current_app
 from datetime import date
-from omnivore.services import PredictionService
-from omnivore.jobs import generate_predictions_job, backfill_actuals_job
+
+from flask import Blueprint, current_app, jsonify, request
+
+from omnivore.jobs import backfill_actuals_job, generate_predictions_job
+from omnivore.prediction import PredictionService
 
 bp = Blueprint("predictions", __name__)
 prediction_service = PredictionService()
@@ -37,10 +39,12 @@ def generate_predictions():
         horizons=data.get("horizons", ["1d"]),
     )
 
-    return jsonify({
-        "job_id": job.id,
-        "status": "queued",
-    }), 202
+    return jsonify(
+        {
+            "job_id": job.id,
+            "status": "queued",
+        }
+    ), 202
 
 
 @bp.route("/backfill-actuals", methods=["POST"])
@@ -53,10 +57,12 @@ def backfill_actuals():
         instrument_id=data["instrument_id"],
     )
 
-    return jsonify({
-        "job_id": job.id,
-        "status": "queued",
-    }), 202
+    return jsonify(
+        {
+            "job_id": job.id,
+            "status": "queued",
+        }
+    ), 202
 
 
 @bp.route("/performance", methods=["GET"])

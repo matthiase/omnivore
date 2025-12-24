@@ -35,7 +35,7 @@ def create_instrument():
 @bp.route("/<int:instrument_id>", methods=["GET"])
 def get_instrument(instrument_id: int):
     """Get instrument by ID."""
-    instrument = data_service.get_instrument_by_id(instrument_id)
+    instrument = data_service.instruments.get_by_id(instrument_id)
     if not instrument:
         return jsonify({"error": "Instrument not found"}), 404
     return jsonify(instrument)
@@ -44,7 +44,7 @@ def get_instrument(instrument_id: int):
 @bp.route("/<int:instrument_id>/refresh", methods=["POST"])
 def refresh_instrument(instrument_id: int):
     """Trigger data refresh for an instrument."""
-    instrument = data_service.get_instrument_by_id(instrument_id)
+    instrument = data_service.instruments.get_by_id(instrument_id)
     if not instrument:
         return jsonify({"error": "Instrument not found"}), 404
 
@@ -68,7 +68,7 @@ def refresh_instrument(instrument_id: int):
 @bp.route("/<int:instrument_id>/features", methods=["POST"])
 def compute_features(instrument_id: int):
     """Trigger feature computation for an instrument."""
-    instrument = data_service.get_instrument_by_id(instrument_id)
+    instrument = data_service.instruments.get_by_id(instrument_id)
     if not instrument:
         return jsonify({"error": "Instrument not found"}), 404
 

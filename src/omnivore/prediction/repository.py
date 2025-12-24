@@ -1,7 +1,5 @@
-# ============================================================================
-# FILE: src/omnivore/repositories/prediction_repository.py
-# ============================================================================
 from typing import List, Optional
+
 from omnivore import db
 
 
@@ -30,7 +28,7 @@ class PredictionRepository:
             )
             ORDER BY i.symbol
             """,
-            (horizon, horizon)
+            (horizon, horizon),
         )
 
     def get_accuracy_summary(self, horizon: str = "1d") -> List[dict]:
@@ -54,7 +52,7 @@ class PredictionRepository:
             GROUP BY i.id, i.symbol
             ORDER BY i.symbol
             """,
-            (horizon,)
+            (horizon,),
         )
 
     def create_prediction(
@@ -87,23 +85,19 @@ class PredictionRepository:
                 horizon,
                 predicted_value,
                 confidence,
-            )
+            ),
         )
 
     def get_by_id(self, prediction_id: int) -> Optional[dict]:
         """
         Get a prediction by its ID.
         """
-        return db.fetch_one(
-            "SELECT * FROM predictions WHERE id = %s",
-            (prediction_id,)
-        )
+        return db.fetch_one("SELECT * FROM predictions WHERE id = %s", (prediction_id,))
 
     def get_actuals_for_prediction(self, prediction_id: int) -> Optional[dict]:
         """
         Get the actuals record for a given prediction.
         """
         return db.fetch_one(
-            "SELECT * FROM prediction_actuals WHERE prediction_id = %s",
-            (prediction_id,)
+            "SELECT * FROM prediction_actuals WHERE prediction_id = %s", (prediction_id,)
         )

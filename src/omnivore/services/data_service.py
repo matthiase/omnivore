@@ -1,7 +1,6 @@
 from omnivore.instrument import InstrumentRepository
 from omnivore.ohlcv import OhlcvRepository
-from omnivore.repositories.model_repository import ModelRepository
-from omnivore.repositories.prediction_repository import PredictionRepository
+from omnivore.prediction import ModelRepository, PredictionRepository
 
 
 class DataService:
