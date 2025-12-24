@@ -1,8 +1,8 @@
 from datetime import date, timedelta
 
 from omnivore import db
+from omnivore.model import ModelRegistry
 from omnivore.services.feature_engine import FeatureEngine
-from omnivore.services.model_registry import ModelRegistry
 
 
 class PredictionService:

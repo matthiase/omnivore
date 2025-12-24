@@ -141,7 +141,6 @@ def model_repo(db_connection):
     from omnivore.model import ModelRepository
 
     return ModelRepository()
-    pass
 
 
 # =============================================================================
