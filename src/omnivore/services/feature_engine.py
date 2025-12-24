@@ -9,14 +9,20 @@ import pandas_ta as ta
 
 from omnivore import db
 from omnivore.config import config
-from omnivore.services.data_service import DataService
+from omnivore.instrument.repository import InstrumentRepository
+from omnivore.ohlcv.repository import OhlcvRepository
+from omnivore.prediction.repository import PredictionRepository
+from omnivore.model.repository import ModelRepository
 
 
 class FeatureEngine:
     """Computes technical indicators and target variables."""
 
     def __init__(self):
-        self.data_service = DataService()
+        self.instruments = InstrumentRepository()
+        self.predictions = PredictionRepository()
+        self.ohlcv = OhlcvRepository()
+        self.models = ModelRepository()
         self.config = config.load_features_config()
 
         # Registry of indicator computation functions
@@ -183,7 +189,7 @@ class FeatureEngine:
     ) -> dict:
         """Compute and store features for an instrument."""
         # Get OHLCV data
-        df = self.data_service.ohlcv.find(instrument_id, start_date, end_date)
+        df = self.ohlcv.find(instrument_id, start_date, end_date)
 
         if df.empty:
             return {

@@ -1,7 +1,6 @@
 from datetime import date, timedelta
 
 from omnivore import db
-from omnivore.model import ModelRegistry
 from omnivore.services.feature_engine import FeatureEngine
 
 
@@ -10,7 +9,6 @@ class PredictionService:
 
     def __init__(self):
         self.feature_engine = FeatureEngine()
-        self.model_registry = ModelRegistry()
 
     def generate_prediction(
         self,
@@ -26,7 +24,10 @@ class PredictionService:
             raise ValueError(f"No active version for model {model_id}")
 
         # Get model definition for target info
-        self.model_registry.get_model(model_id)
+        from omnivore.model.registry import ModelRegistry
+
+        model_registry = ModelRegistry()
+        model_registry.get_model(model_id)
 
         # Determine target date based on horizon
         days = int(horizon.replace("d", ""))

@@ -1,3 +1,4 @@
+import json
 from typing import List, Optional
 
 from omnivore import db
@@ -37,7 +38,14 @@ class ModelRepository:
             VALUES (%s, %s, %s, %s, %s, %s)
             RETURNING *
             """,
-            (name, description, target, model_type, feature_config, hyperparameters or {}),
+            (
+                name,
+                description,
+                target,
+                model_type,
+                feature_config,
+                json.dumps(hyperparameters or {}),
+            ),
         )
 
     # Model Versions

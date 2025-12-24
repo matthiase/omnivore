@@ -2,11 +2,9 @@
 # FILE: src/omnivore/api/routes/instruments.py
 # ============================================================================
 from flask import Blueprint, request, jsonify, current_app
-from omnivore.services import DataService
 from omnivore.jobs import refresh_data_job, compute_features_job
 
 bp = Blueprint("instruments", __name__)
-data_service = DataService()
 
 
 @bp.route("", methods=["GET"])

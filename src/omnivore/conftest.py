@@ -149,14 +149,6 @@ def model_repo(db_connection):
 
 
 @pytest.fixture
-def data_service(db_connection):
-    """Provide a DataService instance."""
-    from omnivore.services import DataService
-
-    return DataService()
-
-
-@pytest.fixture
 def feature_engine(db_connection):
     """Provide a FeatureEngine instance."""
     from omnivore.services import FeatureEngine

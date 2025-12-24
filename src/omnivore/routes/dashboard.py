@@ -1,14 +1,16 @@
 from flask import Blueprint, render_template
-from omnivore.services.data_service import DataService
+from omnivore.instrument.repository import InstrumentRepository
+from omnivore.prediction.repository import PredictionRepository
 
 bp = Blueprint("dashboard", __name__, url_prefix="/")
 
 @bp.route("/")
 def dashboard():
-    ds = DataService()
-    instruments = ds.instruments.get_active_instruments()
-    predictions = ds.predictions.get_latest_predictions(horizon="1d")
-    accuracy = ds.predictions.get_accuracy_summary(horizon="1d")
+    instruments_repo = InstrumentRepository()
+    predictions_repo = PredictionRepository()
+    instruments = instruments_repo.get_active_instruments()
+    predictions = predictions_repo.get_latest_predictions(horizon="1d")
+    accuracy = predictions_repo.get_accuracy_summary(horizon="1d")
     accuracy_map = {row["instrument_id"]: row for row in accuracy}
 
     # Precompute rows for the template
