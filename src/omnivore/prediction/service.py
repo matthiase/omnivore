@@ -113,7 +113,7 @@ class PredictionService:
         if not prediction:
             raise ValueError(f"Prediction {prediction_id} not found")
 
-        predicted_value = prediction["predicted_value"]
+        predicted_value = float(prediction["predicted_value"])
         error = predicted_value - actual_value
         direction_correct = (predicted_value > 0) == (actual_value > 0)
 

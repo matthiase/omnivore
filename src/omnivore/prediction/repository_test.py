@@ -368,7 +368,6 @@ class TestGetActualsForPrediction:
     def test_get_actuals_for_prediction_success(self, db_connection, sample_prediction_with_actual):
         repo = PredictionRepository()
         prediction = sample_prediction_with_actual["prediction"]
-        expected_actual = sample_prediction_with_actual["actual"]
 
         result = repo.get_actuals_for_prediction(prediction["id"])
 
