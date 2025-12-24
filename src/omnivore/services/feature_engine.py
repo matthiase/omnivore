@@ -1,6 +1,3 @@
-# ============================================================================
-# FILE: src/omnivore/services/feature_engine.py
-# ============================================================================
 from datetime import date
 
 import numpy as np
@@ -189,7 +186,7 @@ class FeatureEngine:
     ) -> dict:
         """Compute and store features for an instrument."""
         # Get OHLCV data
-        df = self.ohlcv.find(instrument_id, start_date, end_date)
+        df = self.data_service.ohlcv.find(instrument_id, start_date, end_date)
 
         if df.empty:
             return {
