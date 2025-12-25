@@ -36,7 +36,7 @@ def get_drift_reports():
     """Get drift reports."""
     from flask import request
 
-    from omnivore.model import DriftMonitor
+    from omnivore.model.drift_monitor import DriftMonitor
 
     drift_monitor = DriftMonitor()
     reports = drift_monitor.get_reports(

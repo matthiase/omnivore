@@ -2,13 +2,14 @@ from datetime import date, timedelta
 
 from omnivore import db
 from omnivore.model.registry import ModelRegistry
-from omnivore.services.feature_engine import FeatureEngine
 
 
 class PredictionService:
     """Handles prediction generation and tracking."""
 
     def __init__(self):
+        from omnivore.services.feature_engine import FeatureEngine
+
         self.feature_engine = FeatureEngine()
         self.model_registry = ModelRegistry()
 

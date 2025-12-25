@@ -151,7 +151,7 @@ def model_repo(db_connection):
 @pytest.fixture
 def feature_engine(db_connection):
     """Provide a FeatureEngine instance."""
-    from omnivore.services import FeatureEngine
+    from omnivore.services.feature_engine import FeatureEngine
 
     return FeatureEngine()
 

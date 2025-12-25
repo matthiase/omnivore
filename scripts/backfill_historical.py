@@ -3,7 +3,7 @@
 from datetime import date, timedelta
 
 from omnivore.instrument import InstrumentService
-from omnivore.services import FeatureEngine
+from omnivore.services.feature_engine import FeatureEngine
 
 
 def main():

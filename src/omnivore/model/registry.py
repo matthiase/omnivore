@@ -14,7 +14,6 @@ from xgboost import XGBRegressor
 
 from omnivore import db
 from omnivore.config import config
-from omnivore.services.feature_engine import FeatureEngine
 
 
 class ModelRegistry:
@@ -27,6 +26,8 @@ class ModelRegistry:
     }
 
     def __init__(self):
+        from omnivore.services.feature_engine import FeatureEngine
+
         self.feature_engine = FeatureEngine()
         self.storage_path = config.model_storage_path
         self.storage_path.mkdir(parents=True, exist_ok=True)

@@ -3,9 +3,10 @@
 from datetime import date, timedelta
 
 from omnivore.instrument.service import InstrumentService
-from omnivore.model import DriftMonitor, ModelRegistry
+from omnivore.model.drift_monitor import DriftMonitor
+from omnivore.model.registry import ModelRegistry
 from omnivore.prediction import PredictionService
-from omnivore.services import FeatureEngine
+from omnivore.services.feature_engine import FeatureEngine
 
 
 def refresh_data_job(symbol: str, start_date: str = None, end_date: str = None) -> dict:

@@ -1,7 +1,7 @@
 from flask import Blueprint, current_app, jsonify, request
 
 from omnivore.jobs import train_model_job
-from omnivore.model import ModelRegistry
+from omnivore.model.registry import ModelRegistry
 
 bp = Blueprint("models", __name__)
 model_registry = ModelRegistry()

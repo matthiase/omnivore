@@ -7,9 +7,9 @@ import pandas_ta as ta
 from omnivore import db
 from omnivore.config import config
 from omnivore.instrument.repository import InstrumentRepository
+from omnivore.model.repository import ModelRepository
 from omnivore.ohlcv.repository import OhlcvRepository
 from omnivore.prediction.repository import PredictionRepository
-from omnivore.model.repository import ModelRepository
 
 
 class FeatureEngine:
