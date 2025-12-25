@@ -9,6 +9,7 @@ that will be used instead of creating new ones. This enables
 transaction rollback between tests.
 """
 
+import decimal
 from contextlib import contextmanager
 from typing import Any
 

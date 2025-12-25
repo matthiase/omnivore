@@ -186,7 +186,7 @@ class FeatureEngine:
     ) -> dict:
         """Compute and store features for an instrument."""
         # Get OHLCV data
-        df = self.data_service.ohlcv.find(instrument_id, start_date, end_date)
+        df = self.ohlcv.find(instrument_id, start_date, end_date)
 
         if df.empty:
             return {

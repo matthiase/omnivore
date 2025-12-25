@@ -388,7 +388,7 @@ curl -X POST http://localhost:5000/api/predictions/generate \
   -H "Content-Type: application/json" \
   -d '{
     "model_id": 1,
-    "instrument_ids": [1, 2, 3, 4],
+    "instrument_ids": [1],
     "horizons": ["1d"]
   }'
 ```
