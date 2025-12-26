@@ -9,7 +9,6 @@ that will be used instead of creating new ones. This enables
 transaction rollback between tests.
 """
 
-import decimal
 from contextlib import contextmanager
 from typing import Any
 
@@ -170,8 +169,9 @@ def fetch_dataframe(query: str, params: tuple = None):
     Returns:
         pandas.DataFrame with query results
     """
-    import pandas as pd
     import decimal
+
+    import pandas as pd
 
     with get_connection() as conn:
         with conn.cursor(row_factory=dict_row) as cur:

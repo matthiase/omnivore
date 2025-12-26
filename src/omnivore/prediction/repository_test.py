@@ -1,7 +1,7 @@
 """
 Integration tests for PredictionRepository.
 
-Run with: OMNIVORE_ENV=test pytest src/omnivore/prediction/prediction_repository_test.py -v
+Run with: OMNIVORE_ENV=test pytest src/omnivore/prediction/repository_test.py -v
 """
 
 from datetime import date

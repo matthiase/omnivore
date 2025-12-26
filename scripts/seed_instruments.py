@@ -13,12 +13,12 @@ def main():
     instruments_repo = InstrumentRepository()
 
     for instrument in INITIAL_INSTRUMENTS:
-        existing = instruments_repo.get_instrument(instrument["symbol"])
+        existing = instruments_repo.get_by_symbol(instrument["symbol"])
         if existing:
             print(f"Skipping {instrument['symbol']} - already exists")
             continue
 
-        result = instruments_repo.create_instrument(**instrument)
+        result = instruments_repo.create(**instrument)
         print(f"Created: {result['symbol']} (id={result['id']})")
 
 
