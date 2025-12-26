@@ -1,7 +1,7 @@
 # ============================================================================
 # FILE: src/omnivore/api/routes/jobs.py
 # ============================================================================
-from flask import Blueprint, jsonify, current_app
+from flask import Blueprint, current_app, jsonify
 from rq.job import Job
 
 bp = Blueprint("jobs", __name__)
@@ -35,7 +35,8 @@ def get_job_status(job_id: str):
 def get_drift_reports():
     """Get drift reports."""
     from flask import request
-    from omnivore.services import DriftMonitor
+
+    from omnivore.model.drift_monitor import DriftMonitor
 
     drift_monitor = DriftMonitor()
     reports = drift_monitor.get_reports(

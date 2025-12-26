@@ -1,10 +1,9 @@
-# ============================================================================
-# FILE: src/omnivore/services/drift_monitor.py
-# ============================================================================
 import json
 from datetime import date, timedelta
+
 import numpy as np
 import pandas as pd
+
 from omnivore import db
 from omnivore.services.feature_engine import FeatureEngine
 
@@ -36,7 +35,7 @@ class DriftMonitor:
             JOIN models m ON m.id = mv.model_id
             WHERE mv.id = %s
             """,
-            (model_version_id,)
+            (model_version_id,),
         )
 
         feature_names = version["feature_config"]
@@ -146,7 +145,7 @@ class DriftMonitor:
             WHERE p.model_version_id = %s
             ORDER BY p.prediction_date
             """,
-            (model_version_id,)
+            (model_version_id,),
         )
 
         if len(predictions) < 20:
@@ -221,7 +220,7 @@ class DriftMonitor:
             VALUES (%s, %s, %s, %s, %s)
             RETURNING *
             """,
-            (model_version_id, date.today(), drift_type, json.dumps(metrics), is_alert)
+            (model_version_id, date.today(), drift_type, json.dumps(metrics), is_alert),
         )
 
     def get_reports(

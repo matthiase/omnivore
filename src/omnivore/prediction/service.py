@@ -1,17 +1,15 @@
-# ============================================================================
-# FILE: src/omnivore/services/prediction_service.py
-# ============================================================================
 from datetime import date, timedelta
 
 from omnivore import db
-from omnivore.services.feature_engine import FeatureEngine
-from omnivore.services.model_registry import ModelRegistry
+from omnivore.model.registry import ModelRegistry
 
 
 class PredictionService:
     """Handles prediction generation and tracking."""
 
     def __init__(self):
+        from omnivore.services.feature_engine import FeatureEngine
+
         self.feature_engine = FeatureEngine()
         self.model_registry = ModelRegistry()
 
@@ -23,6 +21,7 @@ class PredictionService:
         horizon: str = "1d",
     ) -> dict:
         """Generate a prediction for a specific date and horizon."""
+
         # Get active model version
         version = self.model_registry.get_active_version(model_id)
         if not version:
@@ -116,8 +115,9 @@ class PredictionService:
         if not prediction:
             raise ValueError(f"Prediction {prediction_id} not found")
 
-        error = prediction["predicted_value"] - actual_value
-        direction_correct = (prediction["predicted_value"] > 0) == (actual_value > 0)
+        predicted_value = float(prediction["predicted_value"])
+        error = predicted_value - actual_value
+        direction_correct = (predicted_value > 0) == (actual_value > 0)
 
         return db.fetch_one(
             """
@@ -140,7 +140,8 @@ class PredictionService:
         # Get predictions without actuals
         predictions = db.fetch_all(
             """
-            SELECT p.* FROM predictions p
+            SELECT p.*, i.symbol FROM predictions p
+            LEFT JOIN instruments i ON i.id = p.instrument_id
             LEFT JOIN prediction_actuals pa ON pa.prediction_id = p.id
             WHERE p.instrument_id = %s
               AND pa.id IS NULL
@@ -162,7 +163,7 @@ class PredictionService:
         for pred in predictions:
             # Get price data for prediction_date and target_date
             df = ohlcv.fetch(
-                instrument_id=instrument_id,
+                symbol=pred["symbol"],
                 start_date=pred["prediction_date"],
                 end_date=pred["target_date"],
             )

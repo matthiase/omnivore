@@ -1,9 +1,7 @@
-# ============================================================================
-# FILE: src/omnivore/api/routes/models.py
-# ============================================================================
-from flask import Blueprint, request, jsonify, current_app
-from omnivore.services import ModelRegistry
+from flask import Blueprint, current_app, jsonify, request
+
 from omnivore.jobs import train_model_job
+from omnivore.model.registry import ModelRegistry
 
 bp = Blueprint("models", __name__)
 model_registry = ModelRegistry()
@@ -61,10 +59,12 @@ def train_model(model_id: int):
         job_timeout="30m",
     )
 
-    return jsonify({
-        "job_id": job.id,
-        "status": "queued",
-    }), 202
+    return jsonify(
+        {
+            "job_id": job.id,
+            "status": "queued",
+        }
+    ), 202
 
 
 @bp.route("/<int:model_id>/versions", methods=["GET"])

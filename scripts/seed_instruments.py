@@ -1,5 +1,5 @@
 """Seed initial instruments into the database."""
-from omnivore.services import DataService
+from omnivore.instrument.repository import InstrumentRepository
 
 INITIAL_INSTRUMENTS = [
     {"symbol": "SPY", "name": "SPDR S&P 500 ETF Trust", "asset_type": "etf", "exchange": "NYSE"},
@@ -10,15 +10,15 @@ INITIAL_INSTRUMENTS = [
 
 
 def main():
-    data_service = DataService()
+    instruments_repo = InstrumentRepository()
 
     for instrument in INITIAL_INSTRUMENTS:
-        existing = data_service.get_instrument(instrument["symbol"])
+        existing = instruments_repo.get_by_symbol(instrument["symbol"])
         if existing:
             print(f"Skipping {instrument['symbol']} - already exists")
             continue
 
-        result = data_service.create_instrument(**instrument)
+        result = instruments_repo.create(**instrument)
         print(f"Created: {result['symbol']} (id={result['id']})")
 
 

@@ -1,21 +1,19 @@
-# ============================================================================
-# FILE: src/omnivore/services/model_registry.py
-# ============================================================================
 import json
-import joblib
-from pathlib import Path
 from datetime import date
+from pathlib import Path
 from typing import Any
+
+import joblib
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-from sklearn.linear_model import Ridge
-from xgboost import XGBRegressor
 from lightgbm import LGBMRegressor
+from sklearn.linear_model import Ridge
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.model_selection import train_test_split
+from xgboost import XGBRegressor
+
 from omnivore import db
 from omnivore.config import config
-from omnivore.services.feature_engine import FeatureEngine
 
 
 class ModelRegistry:
@@ -28,6 +26,8 @@ class ModelRegistry:
     }
 
     def __init__(self):
+        from omnivore.services.feature_engine import FeatureEngine
+
         self.feature_engine = FeatureEngine()
         self.storage_path = config.model_storage_path
         self.storage_path.mkdir(parents=True, exist_ok=True)
@@ -43,7 +43,9 @@ class ModelRegistry:
     ) -> dict:
         """Create a new model definition."""
         if model_type not in self.MODEL_TYPES:
-            raise ValueError(f"Unknown model type: {model_type}. Valid: {list(self.MODEL_TYPES.keys())}")
+            raise ValueError(
+                f"Unknown model type: {model_type}. Valid: {list(self.MODEL_TYPES.keys())}"
+            )
 
         return db.fetch_one(
             """
@@ -58,7 +60,7 @@ class ModelRegistry:
                 model_type,
                 json.dumps(feature_config),
                 json.dumps(hyperparameters or {}),
-            )
+            ),
         )
 
     def get_model(self, model_id: int) -> dict | None:
@@ -145,7 +147,10 @@ class ModelRegistry:
 
         # Split data
         X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=test_size, shuffle=False  # Time series: no shuffle
+            X,
+            y,
+            test_size=test_size,
+            shuffle=False,  # Time series: no shuffle
         )
 
         # Create and train model
@@ -177,13 +182,13 @@ class ModelRegistry:
             "data": {
                 "train_samples": len(X_train),
                 "test_samples": len(X_test),
-            }
+            },
         }
 
         # Determine version number
         latest = db.fetch_one(
             "SELECT COALESCE(MAX(version), 0) as v FROM model_versions WHERE model_id = %s",
-            (model_id,)
+            (model_id,),
         )
         new_version = latest["v"] + 1
 
@@ -198,7 +203,7 @@ class ModelRegistry:
                 "training_end": training_end,
                 "instrument_id": instrument_id,
                 "metrics": metrics,
-            }
+            },
         )
 
         # Record version
@@ -209,7 +214,14 @@ class ModelRegistry:
             VALUES (%s, %s, %s, %s, %s, %s)
             RETURNING *
             """,
-            (model_id, new_version, training_start, training_end, json.dumps(metrics), artifact_path)
+            (
+                model_id,
+                new_version,
+                training_start,
+                training_end,
+                json.dumps(metrics),
+                artifact_path,
+            ),
         )
 
         return {
@@ -223,10 +235,7 @@ class ModelRegistry:
     def activate_version(self, model_id: int, version: int) -> dict:
         """Set a specific version as the active version for a model."""
         # Deactivate all versions for this model
-        db.execute(
-            "UPDATE model_versions SET is_active = false WHERE model_id = %s",
-            (model_id,)
-        )
+        db.execute("UPDATE model_versions SET is_active = false WHERE model_id = %s", (model_id,))
 
         # Activate the specified version
         result = db.fetch_one(
@@ -236,7 +245,7 @@ class ModelRegistry:
             WHERE model_id = %s AND version = %s
             RETURNING *
             """,
-            (model_id, version)
+            (model_id, version),
         )
 
         if not result:
@@ -251,21 +260,19 @@ class ModelRegistry:
             SELECT * FROM model_versions
             WHERE model_id = %s AND is_active = true
             """,
-            (model_id,)
+            (model_id,),
         )
 
     def get_version(self, model_id: int, version: int) -> dict | None:
         """Get a specific model version."""
         return db.fetch_one(
-            "SELECT * FROM model_versions WHERE model_id = %s AND version = %s",
-            (model_id, version)
+            "SELECT * FROM model_versions WHERE model_id = %s AND version = %s", (model_id, version)
         )
 
     def list_versions(self, model_id: int) -> list[dict]:
         """List all versions for a model."""
         return db.fetch_all(
-            "SELECT * FROM model_versions WHERE model_id = %s ORDER BY version DESC",
-            (model_id,)
+            "SELECT * FROM model_versions WHERE model_id = %s ORDER BY version DESC", (model_id,)
         )
 
     def predict(
@@ -274,10 +281,7 @@ class ModelRegistry:
         features: pd.DataFrame,
     ) -> np.ndarray:
         """Generate predictions using a trained model version."""
-        version = db.fetch_one(
-            "SELECT * FROM model_versions WHERE id = %s",
-            (model_version_id,)
-        )
+        version = db.fetch_one("SELECT * FROM model_versions WHERE id = %s", (model_version_id,))
 
         if not version:
             raise ValueError(f"Model version {model_version_id} not found")
@@ -299,16 +303,18 @@ class ModelRegistry:
             if isinstance(metrics, str):
                 metrics = json.loads(metrics)
 
-            rows.append({
-                "version": v["version"],
-                "is_active": v["is_active"],
-                "trained_at": v["trained_at"],
-                "train_rmse": metrics.get("train", {}).get("rmse"),
-                "test_rmse": metrics.get("test", {}).get("rmse"),
-                "train_r2": metrics.get("train", {}).get("r2"),
-                "test_r2": metrics.get("test", {}).get("r2"),
-                "train_dir_acc": metrics.get("train", {}).get("directional_accuracy"),
-                "test_dir_acc": metrics.get("test", {}).get("directional_accuracy"),
-            })
+            rows.append(
+                {
+                    "version": v["version"],
+                    "is_active": v["is_active"],
+                    "trained_at": v["trained_at"],
+                    "train_rmse": metrics.get("train", {}).get("rmse"),
+                    "test_rmse": metrics.get("test", {}).get("rmse"),
+                    "train_r2": metrics.get("train", {}).get("r2"),
+                    "test_r2": metrics.get("test", {}).get("r2"),
+                    "train_dir_acc": metrics.get("train", {}).get("directional_accuracy"),
+                    "test_dir_acc": metrics.get("test", {}).get("directional_accuracy"),
+                }
+            )
 
         return pd.DataFrame(rows)

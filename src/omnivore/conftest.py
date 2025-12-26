@@ -138,9 +138,9 @@ def instrument_repo(db_connection):
 @pytest.fixture
 def model_repo(db_connection):
     """Provide a ModelRepository instance (when implemented)."""
-    # from omnivore.repositories import ModelRepository
-    # return ModelRepository()
-    pass
+    from omnivore.model import ModelRepository
+
+    return ModelRepository()
 
 
 # =============================================================================
@@ -149,17 +149,9 @@ def model_repo(db_connection):
 
 
 @pytest.fixture
-def data_service(db_connection):
-    """Provide a DataService instance."""
-    from omnivore.services import DataService
-
-    return DataService()
-
-
-@pytest.fixture
 def feature_engine(db_connection):
     """Provide a FeatureEngine instance."""
-    from omnivore.services import FeatureEngine
+    from omnivore.services.feature_engine import FeatureEngine
 
     return FeatureEngine()
 
@@ -167,7 +159,7 @@ def feature_engine(db_connection):
 @pytest.fixture
 def prediction_service(db_connection):
     """Provide a PredictionService instance."""
-    from omnivore.services import PredictionService
+    from omnivore.prediction import PredictionService
 
     return PredictionService()
 
