@@ -98,6 +98,40 @@ You should see the four seeded ETFs.
 
 ---
 
+## Command-Line Interface (CLI)
+
+Omnivore includes a CLI tool for daily operations. This tool allows you to interactively perform key tasks for a selected instrument, with confirmation prompts before any changes are made.
+
+### Usage
+
+Activate your virtual environment, then run:
+
+```bash
+python -m omnivore.cli <subcommand>
+```
+
+Available subcommands:
+
+- `refresh-data` — Refresh daily OHLCV data for an instrument
+- `record-actuals` — Record actual market values for an instrument
+- `recompute-features` — Recompute features for an instrument
+- `generate-predictions` — Generate daily predictions for an instrument
+
+### Example
+
+```bash
+python -m omnivore.cli refresh-data
+```
+
+You will be prompted to select an instrument from the list of active instruments. Before any changes are made to the database, the CLI will display a summary of the intended operation and ask for confirmation.
+
+### How it works
+
+- The CLI uses interactive prompts to guide you through selecting an instrument and confirming actions.
+- All operations are performed synchronously and use internal Python functions (no background jobs).
+- Database changes are made within a transaction and only committed after you confirm the summary prompt.
+
+
 ## Running Tests
 
 Create a `.env.test` with your configuration. For example:
@@ -358,30 +392,43 @@ curl "http://localhost:5000/api/jobs/drift/reports?model_version_id=1"
 
 ## Daily Operations
 
-### Refresh Data (run daily after market close)
+You can perform daily operations using the CLI tool:
 
 ```bash
-# Refresh SPY data
+# Refresh daily OHLCV data for an instrument
+python -m omnivore.cli refresh-data
+
+# Record actual market values for an instrument
+python -m omnivore.cli record-actuals
+
+# Recompute features for an instrument
+python -m omnivore.cli recompute-features
+
+# Generate daily predictions for an instrument
+python -m omnivore.cli generate-predictions
+```
+
+You will be prompted to select the instrument for each operation. The CLI will summarize the changes and ask for confirmation before committing them to the database.
+
+Alternatively, you can use the API endpoints as shown below:
+
+### Refresh Data (API)
+
+```bash
 curl -X POST http://localhost:5000/api/instruments/1/refresh \
   -H "Content-Type: application/json" \
   -d '{}'
+```
 
-# Recompute features
+### Recompute Features (API)
+
+```bash
 curl -X POST http://localhost:5000/api/instruments/1/features \
   -H "Content-Type: application/json" \
   -d '{}'
-
-# Generate daily predictions
-curl -X POST http://localhost:5000/api/predictions/generate \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model_id": 1,
-    "instrument_ids": [1],
-    "horizons": ["1d"]
-  }'
 ```
 
-### Generate Daily Predictions
+### Generate Daily Predictions (API)
 
 ```bash
 curl -X POST http://localhost:5000/api/predictions/generate \
